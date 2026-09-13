@@ -8,4 +8,3 @@ pub struct Db {
     pub original_url: String,
     pub created_at: NaiveDateTime,
 }
-

@@ -1,10 +1,13 @@
-use std::env::VarError;
 use axum::http::StatusCode;
 use axum::response::{IntoResponse, Response};
+use std::env::VarError;
 use thiserror::Error;
 use tracing::error;
+
 #[derive(Debug, Error)]
 pub enum GenericErrors {
+    #[error("Unsupported Url")]
+    UnsupportedUrl,
     #[error("Conversion Error")]
     ConversionError(#[from] VarError),
     #[error("Not Found")]
@@ -23,9 +26,10 @@ impl IntoResponse for GenericErrors {
             Self::ConfigError(e) => {
                 error!("Config error {}", e);
                 StatusCode::INTERNAL_SERVER_ERROR
-            },
+            }
             Self::Conflict => StatusCode::CONFLICT,
             Self::NotFound => StatusCode::NOT_FOUND,
+            Self::UnsupportedUrl => StatusCode::UNSUPPORTED_MEDIA_TYPE,
             _ => StatusCode::INTERNAL_SERVER_ERROR,
         };
         current_status.into_response()
@@ -34,14 +38,14 @@ impl IntoResponse for GenericErrors {
 
 impl From<sqlx::Error> for GenericErrors {
     fn from(err: sqlx::Error) -> Self {
-       match err {
-           sqlx::Error::Database(e) if e.is_unique_violation() => GenericErrors::Conflict,
-           sqlx::Error::RowNotFound => GenericErrors::NotFound,
-           sqlx::Error::ColumnNotFound(e) => {
-               error!("Column not found {}", e);
-               GenericErrors::NotFound
-           },
-           _ => GenericErrors::DatabaseError,
-       }
+        match err {
+            sqlx::Error::Database(e) if e.is_unique_violation() => GenericErrors::Conflict,
+            sqlx::Error::RowNotFound => GenericErrors::NotFound,
+            sqlx::Error::ColumnNotFound(e) => {
+                error!("Column not found {}", e);
+                GenericErrors::NotFound
+            }
+            _ => GenericErrors::DatabaseError,
+        }
     }
 }
