@@ -4,9 +4,10 @@ pub mod handlers;
 pub mod models;
 
 use crate::config::config::Config;
+use crate::handlers::handlers::{redirect, shorten_url};
 use anyhow::Error;
-use axum::http::{HeaderValue, Method};
 use axum::Router;
+use axum::http::{HeaderValue, Method};
 use axum::routing::{get, post};
 use dotenvy::dotenv;
 use tower_http::cors::CorsLayer;
@@ -14,7 +15,6 @@ use tower_http::trace::TraceLayer;
 use tracing::{debug, error};
 use tracing_subscriber::layer::SubscriberExt;
 use tracing_subscriber::util::SubscriberInitExt;
-use crate::handlers::handlers::{redirect, shorten_url};
 
 #[tokio::main]
 async fn main() -> Result<(), Error> {
@@ -23,9 +23,15 @@ async fn main() -> Result<(), Error> {
         Err(e) => error!("Error loading .env!: {}", e),
     }
     tracing_subscriber::registry()
-        .with(tracing_subscriber::EnvFilter::try_from_default_env().unwrap_or_else(|_| {
-            format!("{}=debug,tower_http=debug,tower_http=debug",env!("CARGO_CRATE_NAME")).into()
-        }))
+        .with(
+            tracing_subscriber::EnvFilter::try_from_default_env().unwrap_or_else(|_| {
+                format!(
+                    "{}=debug,tower_http=debug,tower_http=debug",
+                    env!("CARGO_CRATE_NAME")
+                )
+                .into()
+            }),
+        )
         .with(tracing_subscriber::fmt::layer())
         .init();
 

@@ -1,11 +1,11 @@
 use crate::config::config::Config;
 use crate::error::error::GenericErrors;
+use crate::models::db::Db;
 use crate::models::url::{UrlShortenRequestDTO, UrlShortenResponseDTO};
 use axum::Json;
 use axum::extract::{Path, State};
 use axum::response::Redirect;
 use nanoid::nanoid;
-use crate::models::db::Db;
 
 pub async fn shorten_url(
     State(state): State<Config>,
@@ -30,20 +30,16 @@ pub async fn redirect(
     State(state): State<Config>,
     Path(payload): Path<String>,
 ) -> Result<Redirect, GenericErrors> {
-
     let query = sqlx::query_as!(
         Db,
         "SELECT id, short_code, original_url, created_at FROM links WHERE short_code = $1",
         payload,
-    ).fetch_optional(&state.db).await?;
+    )
+    .fetch_optional(&state.db)
+    .await?;
 
     match query {
-        Some(v) => {
-            Ok(Redirect::to(&v.original_url))
-        },
-        None => {
-            Err(GenericErrors::NotFound)
-        },
+        Some(v) => Ok(Redirect::to(&v.original_url)),
+        None => Err(GenericErrors::NotFound),
     }
 }
-
