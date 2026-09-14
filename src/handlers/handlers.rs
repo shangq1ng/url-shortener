@@ -47,11 +47,9 @@ pub async fn redirect(
 
     match query {
         Some(v) => {
-            debug!("Redirecting to {}", &v.original_url);
             Ok(Redirect::to(&v.original_url))
         },
         None => {
-            debug!("did not found it on table");
             Err(GenericErrors::NotFound)
         },
     }
