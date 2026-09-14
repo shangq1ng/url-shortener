@@ -1,5 +1,7 @@
 # url-shortener
 
+
+]([![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE))
 A URL shortener built in Rust.
 
 ## Stack
