@@ -1,13 +1,11 @@
-use anyhow::Context;
 use crate::config::config::Config;
 use crate::error::error::GenericErrors;
-use crate::models::url::{UrlRedirectRequestDTO, UrlShortenRequestDTO};
+use crate::models::url::UrlShortenRequestDTO;
 use axum::Json;
 use axum::extract::{Path, State};
 use axum::response::Redirect;
 use nanoid::nanoid;
 use serde_json::{Value, json};
-use tracing::debug;
 use crate::models::db::Db;
 
 pub async fn shorten_url(
