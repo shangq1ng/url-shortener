@@ -1,17 +1,16 @@
 use crate::config::config::Config;
 use crate::error::error::GenericErrors;
-use crate::models::url::UrlShortenRequestDTO;
+use crate::models::url::{UrlShortenRequestDTO, UrlShortenResponseDTO};
 use axum::Json;
 use axum::extract::{Path, State};
 use axum::response::Redirect;
 use nanoid::nanoid;
-use serde_json::{Value, json};
 use crate::models::db::Db;
 
 pub async fn shorten_url(
     State(state): State<Config>,
     Json(payload): Json<UrlShortenRequestDTO>,
-) -> Result<Json<Value>, GenericErrors> {
+) -> Result<Json<UrlShortenResponseDTO>, GenericErrors> {
     let code = nanoid!(5);
     sqlx::query_as!(
         Db,
@@ -24,12 +23,7 @@ pub async fn shorten_url(
     .await?;
 
     let txt = format!("http://localhost:{}/{}", state.port, code);
-
-    let val = json!({
-        "url": txt,
-    });
-
-    Ok(Json(val))
+    Ok(Json(UrlShortenResponseDTO { short_code: txt }))
 }
 
 pub async fn redirect(

@@ -5,7 +5,7 @@ pub struct UrlShortenRequestDTO {
     pub url: String,
 }
 
-#[derive(Debug, Serialize)] // TODO: Use it!
+#[derive(Debug, Serialize)]
 pub struct UrlShortenResponseDTO {
     pub short_code: String,
 }
