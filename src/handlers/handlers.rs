@@ -11,19 +11,23 @@ pub async fn shorten_url(
     State(state): State<Config>,
     Json(payload): Json<UrlShortenRequestDTO>,
 ) -> Result<Json<UrlShortenResponseDTO>, GenericErrors> {
-    let code = nanoid!(5);
-    sqlx::query_as!(
-        Db,
-        "INSERT INTO links (short_code, original_url)
-        VALUES ($1, $2)",
-        code,
-        payload.url,
-    )
-    .execute(&state.db)
-    .await?;
+    if payload.url.contains("https://") || payload.url.contains("http://") {
+        let code = nanoid!(5);
+        sqlx::query_as!(
+            Db,
+            "INSERT INTO links (short_code, original_url)
+            VALUES ($1, $2)",
+            code,
+            payload.url,
+        )
+            .execute(&state.db)
+            .await?;
 
-    let txt = format!("http://localhost:{}/{}", state.port, code);
-    Ok(Json(UrlShortenResponseDTO { short_code: txt }))
+        let txt = format!("http://localhost:{}/{}", state.port, code);
+        Ok(Json(UrlShortenResponseDTO { short_code: txt }))
+    } else {
+        Err(GenericErrors::UnsupportedUrl)
+    }
 }
 
 pub async fn redirect(
@@ -39,7 +43,10 @@ pub async fn redirect(
     .await?;
 
     match query {
-        Some(v) => Ok(Redirect::to(&v.original_url)),
+        Some(v) => {
+            println!("Original URL: {}", v.original_url);
+            Ok(Redirect::to(&v.original_url))
+        },
         None => Err(GenericErrors::NotFound),
     }
 }

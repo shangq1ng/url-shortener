@@ -6,6 +6,10 @@ use tracing::error;
 
 #[derive(Debug, Error)]
 pub enum GenericErrors {
+    #[error("Content-Type Not Allowed")]
+    ContentTypeNotAllowed,
+    #[error("FORBIDDEN")]
+    Forbidden,
     #[error("Unsupported Url")]
     UnsupportedUrl,
     #[error("Conversion Error")]
@@ -23,6 +27,8 @@ pub enum GenericErrors {
 impl IntoResponse for GenericErrors {
     fn into_response(self) -> Response {
         let current_status = match self {
+            Self::ContentTypeNotAllowed => StatusCode::NOT_ACCEPTABLE,
+            Self::Forbidden => StatusCode::FORBIDDEN,
             Self::ConfigError(e) => {
                 error!("Config error {}", e);
                 StatusCode::INTERNAL_SERVER_ERROR

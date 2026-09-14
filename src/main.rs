@@ -1,6 +1,7 @@
 pub mod config;
 pub mod error;
 pub mod handlers;
+pub mod middleware;
 pub mod models;
 
 use crate::config::config::Config;
@@ -10,7 +11,7 @@ use axum::Router;
 use axum::http::{HeaderValue, Method};
 use axum::routing::{get, post};
 use dotenvy::dotenv;
-use tower_http::cors::CorsLayer;
+use tower_http::cors::{Any, CorsLayer};
 use tower_http::trace::TraceLayer;
 use tracing::{debug, error};
 use tracing_subscriber::layer::SubscriberExt;
@@ -37,7 +38,7 @@ async fn main() -> Result<(), Error> {
 
     let cors = CorsLayer::new()
         .allow_methods(vec![Method::GET, Method::POST])
-        .allow_origin("http://3000".parse::<HeaderValue>()?); // Maybe i'd hook a frontend up on port 3000?
+        .allow_origin(Any);
 
     let config = Config::new().await?;
     let listener = tokio::net::TcpListener::bind(("localhost", config.port)).await?;
