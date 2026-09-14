@@ -43,10 +43,7 @@ pub async fn redirect(
     .await?;
 
     match query {
-        Some(v) => {
-            println!("Original URL: {}", v.original_url);
-            Ok(Redirect::to(&v.original_url))
-        },
+        Some(v) => Ok(Redirect::to(&v.original_url)),
         None => Err(GenericErrors::NotFound),
     }
 }

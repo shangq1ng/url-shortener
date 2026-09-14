@@ -1,7 +1,6 @@
 pub mod config;
 pub mod error;
 pub mod handlers;
-pub mod middleware;
 pub mod models;
 
 use crate::config::config::Config;
